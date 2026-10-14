@@ -111,3 +111,18 @@ review instance is active, for example `npm run dev -- --port 4381`.
   throughout a rotation. All twelve checks passed (89 ms test-runner duration).
 - Build passed (267 ms Vite duration; combined command wall time 0.73 s).
 - Tailnet page/assets match the new build. No browser validation was run.
+
+## Cloudflare Workers deployment
+
+This is a static Vite application. `wrangler.jsonc` publishes the `dist/` assets
+as the `orbital` Worker; no server code, secrets, or storage bindings are needed.
+
+Connect `maxthelion/orbital` in Cloudflare Workers Builds and use:
+
+- Production branch: `main`
+- Root directory: repository root
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`
+
+Cloudflare installs dependencies from `package-lock.json`. For deployment from
+an authenticated local terminal, run `npm run deploy`.
