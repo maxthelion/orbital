@@ -4,9 +4,8 @@ export const HALF_WIDTH = 6;
 export const EYE_HEIGHT = 1.72;
 export const TAU = Math.PI * 2;
 export const START_ANGLE = -Math.PI / 2;
-// Fraction of the original spin that produced 1 g at the outer hull.
-export const SPIN_SPEED_FACTOR = 0.5;
-export const gravityAt = (radius) => 9.81 * SPIN_SPEED_FACTOR ** 2 * Math.max(0, radius) / RADIUS;
+export const DEFAULT_RIM_GRAVITY = 0.25;
+export const gravityAt = (radius, rimGravity = DEFAULT_RIM_GRAVITY) => 9.81 * rimGravity * Math.max(0, radius) / RADIUS;
 export const wrapAngle = (angle) => ((angle % TAU) + TAU) % TAU;
 
 export function createPlayer() {
@@ -16,7 +15,7 @@ export function createPlayer() {
 // A deliberately constrained walking controller in the station's rotating frame.
 // Angular motion follows the floor; height measures inward distance from the hull.
 // Coriolis forces are omitted for this first proof of concept.
-export function stepPlayer(player, input, dt) {
+export function stepPlayer(player, input, dt, rimGravity = DEFAULT_RIM_GRAVITY) {
   const length = Math.hypot(input.forward, input.side) || 1;
   const speed = input.run ? 13 : 4.6;
   const forward = input.forward / Math.max(1, length);
@@ -27,7 +26,7 @@ export function stepPlayer(player, input, dt) {
   player.z = Math.max(-HALF_WIDTH + 0.42, Math.min(HALF_WIDTH - 0.42, player.z + across * dt));
   player.travel += Math.abs(along * dt);
   if (input.jump && player.height === 0) player.verticalSpeed = 4.7;
-  player.verticalSpeed -= gravityAt(RADIUS - player.height) * dt;
+  player.verticalSpeed -= gravityAt(RADIUS - player.height, rimGravity) * dt;
   player.height += player.verticalSpeed * dt;
   if (player.height < 0) {
     player.height = 0;

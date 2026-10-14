@@ -20,7 +20,7 @@ test('exterior observer is opposite the planet and remains fixed in inertial spa
   for (const phase of [0.25, 0.5, 0.75, 1]) {
     const time = phase * ROTATION_PERIOD;
     assert.ok(skyDirection.clone().applyAxisAngle(axis, -time * ANGULAR_SPEED).distanceTo(skyDirection) < 1e-8);
-    updateExteriorCamera(camera, time);
+    updateExteriorCamera(camera, time * ANGULAR_SPEED);
     const inertialPosition = camera.position.clone().applyAxisAngle(axis, time * ANGULAR_SPEED);
     assert.ok(inertialPosition.distanceTo(position) < 1e-8);
     const projection = skyDirection.clone().applyAxisAngle(axis, -time * ANGULAR_SPEED).add(camera.position).project(camera);
@@ -32,7 +32,7 @@ test('complete ring and axis fit the exterior camera on portrait and wide screen
   for (const aspect of [9 / 16, 1, 16 / 9, 32 / 9]) {
     const camera = createExteriorCamera(aspect);
     for (const fraction of [0, 0.25, 0.5, 0.75]) {
-      updateExteriorCamera(camera, fraction * ROTATION_PERIOD);
+      updateExteriorCamera(camera, fraction * Math.PI * 2);
       const points = [new Vector3(0, 0, -285), new Vector3(0, 0, 260)];
       for (let i = 0; i < 128; i++) for (const z of [-6, 6]) points.push(new Vector3(Math.cos(i / 128 * Math.PI * 2) * RADIUS, Math.sin(i / 128 * Math.PI * 2) * RADIUS, z));
       for (const point of points) {

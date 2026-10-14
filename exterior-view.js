@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { RADIUS, START_ANGLE } from './movement.js';
-import { ANGULAR_SPEED, ROTATION_PERIOD } from './rotation.js';
 
 const axis = new THREE.Vector3(0, 0, 1);
 // Positive Z is the side opposite the planet. An oblique angle makes the
@@ -19,10 +18,10 @@ export function resizeExteriorCamera(camera, aspect) {
   camera.far = camera.userData.viewDistance + 1000;
   camera.updateProjectionMatrix();
 }
-export function updateExteriorCamera(camera, elapsedSeconds) {
+export function updateExteriorCamera(camera, spinAngle) {
   // Match the inertial observer to the existing rotating station coordinates.
   // This keeps the distant planet/stars fixed while the station visibly spins.
-  const inverseSpin = -(elapsedSeconds % ROTATION_PERIOD) * ANGULAR_SPEED;
+  const inverseSpin = -spinAngle;
   camera.position.copy(viewingDirection).multiplyScalar(camera.userData.viewDistance).applyAxisAngle(axis, inverseSpin);
   camera.up.set(0, 1, 0).applyAxisAngle(axis, inverseSpin);
   camera.lookAt(0, 0, 0);

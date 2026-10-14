@@ -23,6 +23,17 @@ jump, and Esc to pause. Arrow up/down also walk; arrow left/right turn. If point
 lock is unavailable, drag the view to look. Touch devices get directional buttons
 and drag-to-look. Reset position returns to the initial observation point.
 
+Use the **Gravity at the rim** buttons, or press **G**, to switch between:
+
+| Gravity | Rotation speed | Time per revolution |
+| --- | --- | --- |
+| 0.25 g (default) | 1.11 rpm | 53.8 seconds |
+| 1 g | 2.23 rpm | 26.9 seconds |
+
+Both views, external lighting, jump acceleration and readouts update together.
+Switching preserves the current rotation angle. Speed changes are instantaneous
+for comparison; the prototype does not simulate the spin-up forces.
+
 Press **V** or click **Exterior view** to switch to an oblique camera on the side
 opposite the planet. The amber dashed line marks the physical Z rotation axis;
 the cyan sector 01 marker follows the ring. The axis arrow points towards the
@@ -36,10 +47,10 @@ Direct exterior view: https://omarchy.tail4ba9e6.ts.net:8535/?view=exterior
 
 - 1,131 m continuous corridor; 12 m wide, 7 m high, divided into 16 marked sectors.
 - Floor at radius 180 m. Local up points towards the rotation axis.
-- Half the original spin speed gives quarter gravity: `g(r) = 9.81 * 0.5² * r / 180`.
-  The floor has 0.25 g; jumping uses this reduced acceleration.
+- Gravity follows the selected rim setting: `g(r) = 9.81 * rimGravity * r / 180`.
+  The default is 0.25 g, with a 1 g preset available. Jumping uses the same setting.
 - Fixed 120 Hz movement integration; radial jumps, wall and ceiling constraints.
-- The ring spins at `0.5 * sqrt(9.81 / 180)` rad/s: 1.11 rpm, one turn every 53.8 s.
+- Ring speed follows `sqrt(9.81 * rimGravity / 180)` rad/s.
   The baked sky and external light directions rotate oppositely around the Z axis
   in station coordinates. Walking and local gravity remain relative to the deck.
 - Spin follows elapsed real time, including while controls are paused or the tab
@@ -126,3 +137,12 @@ Connect `maxthelion/orbital` in Cloudflare Workers Builds and use:
 
 Cloudflare installs dependencies from `package-lock.json`. For deployment from
 an authenticated local terminal, run `npm run deploy`.
+
+
+## Gravity controls — 14 October 2026
+
+- Added 0.25 g / 1 g buttons and the G shortcut in both views. Rotation, gravity,
+  jumping and readouts use the selected preset; speed changes preserve spin angle.
+- Fourteen focused checks passed (244 ms test-runner duration), including both
+  jump heights and continuous angle when switching. Build passed (1.89 s Vite).
+- No browser validation was run.

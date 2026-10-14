@@ -5,7 +5,9 @@ const idle = { forward: 0, side: 0, run: false, jump: false };
 const near = (actual, expected, tolerance = 1e-8) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} != ${expected}`);
 
 test('gravity weakens linearly to zero at the axis', () => {
-  near(gravityAt(RADIUS), 2.4525); near(gravityAt(RADIUS / 2), 1.22625); near(gravityAt(0), 0);
+  for (const g of [0.25, 1]) {
+    near(gravityAt(RADIUS, g), 9.81 * g); near(gravityAt(RADIUS / 2, g), 9.81 * g / 2); near(gravityAt(0, g), 0);
+  }
 });
 test('a full circuit closes without changing height or position', () => {
   const p = createPlayer(); p.yaw = 0;
@@ -23,13 +25,15 @@ test('camera stays inside the floor around the entire ring', () => {
     const [x, y] = playerPosition(p); near(Math.hypot(x, y), RADIUS - EYE_HEIGHT);
   }
 });
-test('quarter-gravity jump rises higher and lands without tunnelling', () => {
+test('both gravity presets produce the expected jump height and a safe landing', () => {
+  for (const [g, min, max] of [[0.25, 4.4, 4.7], [1, 1, 1.2]]) {
   const p = createPlayer(); let peak = 0;
   for (let i = 0; i < 600; i++) {
-    stepPlayer(p, { ...idle, jump: i === 0 }, 1 / 120);
+    stepPlayer(p, { ...idle, jump: i === 0 }, 1 / 120, g);
     peak = Math.max(peak, p.height); assert.ok(p.height >= 0);
   }
-  assert.ok(peak > 4.4 && peak < 4.7); near(p.height, 0); near(p.verticalSpeed, 0);
+  assert.ok(peak > min && peak < max); near(p.height, 0); near(p.verticalSpeed, 0);
+  }
 });
 test('both window walls constrain movement including diagonal input', () => {
   for (const direction of [-1, 1]) {

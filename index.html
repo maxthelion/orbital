@@ -12,7 +12,12 @@
     <canvas id="scene" aria-label="First person view inside an orbital ring corridor"></canvas>
     <header><div class="wordmark"><span class="orbit-symbol">◉</span> PERIHELION <small>ORBITAL OBSERVATORY</small></div><div class="live"><i></i> HABITAT SYSTEMS NOMINAL</div></header>
     <button id="view-toggle" type="button" aria-pressed="false">Exterior view · V</button>
-    <aside id="exterior-caption"><span class="eyebrow">EXTERIOR / PLANET-OPPOSITE SIDE</span><strong>The ring turns. The axis stays fixed.</strong><p>Amber: axis towards planet centre · Cyan: sector 01<br>1.11 rpm · 53.8 seconds per rotation · 0.25 g at the rim</p></aside>
+    <div id="gravity-controls" role="group" aria-label="Gravity at the rim">
+      <span class="eyebrow">GRAVITY AT THE RIM</span>
+      <div class="gravity-options"><button type="button" data-gravity="0.25" aria-pressed="true">0.25 g<small>1.11 rpm</small></button><button type="button" data-gravity="1" aria-pressed="false">1 g<small>2.23 rpm</small></button></div>
+      <span class="gravity-shortcut">Press G to switch</span>
+    </div>
+    <aside id="exterior-caption"><span class="eyebrow">EXTERIOR / PLANET-OPPOSITE SIDE</span><strong>The ring turns. The axis stays fixed.</strong><p>Amber: axis towards planet centre · Cyan: sector 01<br><span id="exterior-spin-readout">1.11 rpm · 53.8 seconds per rotation · 0.25 g at the rim</span></p></aside>
     <section id="welcome" class="welcome">
       <div class="eyebrow">JOVIAN ORBIT / OBSERVATION RING 01</div>
       <h1>A different<br>kind of down.</h1>

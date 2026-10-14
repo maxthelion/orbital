@@ -3,7 +3,7 @@ import './style.css';
 import { createSky } from './sky.js';
 import { createStation } from './station.js';
 import { createExteriorCamera, resizeExteriorCamera, updateExteriorCamera, createExteriorGuides } from './exterior-view.js';
-import { createStationRotation, ROTATION_PERIOD, ROTATION_RPM } from './rotation.js';
+import { createStationRotation, createSpinClock } from './rotation.js';
 import { RADIUS, TAU, START_ANGLE, createPlayer, gravityAt, playerPosition, stepPlayer, wrapAngle } from './movement.js';
 
 const canvas = document.querySelector('#scene');
@@ -29,7 +29,8 @@ function boot() {
   const fill = new THREE.DirectionalLight('#8ac5e7', 0.85);
   fill.position.set(30, -100, 130); scene.add(fill);
   const rotateStation = createStationRotation(scene, [sun, fill]);
-  document.querySelector('#rotation-readout').textContent = `ROTATION ${ROTATION_RPM.toFixed(2)} RPM / ${ROTATION_PERIOD.toFixed(1)} S`;
+  const rotationStartedAt = performance.now();
+  const spinClock = createSpinClock();
   const camera = new THREE.PerspectiveCamera(76, window.innerWidth / window.innerHeight, 0.05, 900);
   const exteriorCamera = createExteriorCamera(camera.aspect);
   const exteriorGuides = createExteriorGuides();
@@ -52,6 +53,20 @@ function boot() {
   const dot = document.querySelector('#map-dot');
   const sector = document.querySelector('#sector');
   const distance = document.querySelector('#distance');
+  const gravityButtons = [...document.querySelectorAll('[data-gravity]')];
+  function syncGravityUI() {
+    const { rimGravity, rpm, period } = spinClock.settings;
+    for (const button of gravityButtons) button.setAttribute('aria-pressed', String(Number(button.dataset.gravity) === rimGravity));
+    document.querySelector('#rotation-readout').textContent = `ROTATION ${rpm.toFixed(2)} RPM / ${period.toFixed(1)} S`;
+    document.querySelector('#exterior-spin-readout').textContent = `${rpm.toFixed(2)} rpm · ${period.toFixed(1)} seconds per rotation · ${rimGravity} g at the rim`;
+    gravity.innerHTML = `${(gravityAt(RADIUS - player.height, rimGravity) / 9.81).toFixed(2)} <small>g</small>`;
+  }
+  function selectGravity(value) {
+    spinClock.setGravity(value, (performance.now() - rotationStartedAt) / 1000);
+    syncGravityUI();
+  }
+  for (const button of gravityButtons) button.addEventListener('click', () => selectGravity(Number(button.dataset.gravity)));
+  syncGravityUI();
   function clearInput() { keys.clear(); touchMoves.clear(); jumpQueued = false; dragId = null; }
   function setPlaying(value) {
     playing = value;
@@ -118,6 +133,7 @@ function boot() {
   for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) canvas.addEventListener(event, () => { dragId = null; });
   const controlCodes = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight']);
   document.addEventListener('keydown', (event) => {
+    if (event.code === 'KeyG' && !event.repeat) { event.preventDefault(); selectGravity(spinClock.settings.rimGravity === 0.25 ? 1 : 0.25); return; }
     if (event.code === 'KeyV' && !event.repeat) { event.preventDefault(); toggleView(); return; }
     if (event.code === 'Escape' && playing && document.pointerLockElement !== canvas) setPlaying(false);
     if (!playing || !controlCodes.has(event.code)) return;
@@ -147,15 +163,15 @@ function boot() {
     event.preventDefault(); renderer.setAnimationLoop(null); setPlaying(false);
     status.textContent = 'The graphics context was interrupted. Reload the page to restart.'; enter.disabled = true;
   });
-  const rotationStartedAt = performance.now();
   let previous = rotationStartedAt, accumulator = 0, nextHud = 0;
   const timestep = 1 / 120;
   renderer.setAnimationLoop((now) => {
     // Absolute elapsed time preserves the true spin rate at low frame rates and
     // after background tabs resume. Pausing controls does not stop the habitat.
     const elapsedSeconds = (now - rotationStartedAt) / 1000;
-    rotateStation(elapsedSeconds);
-    if (exterior) updateExteriorCamera(exteriorCamera, elapsedSeconds);
+    const spinAngle = spinClock.angleAt(elapsedSeconds);
+    rotateStation(spinAngle);
+    if (exterior) updateExteriorCamera(exteriorCamera, spinAngle);
     const dt = Math.min((now - previous) / 1000, 0.05); previous = now;
     if (playing) {
       const touch = new Set(touchMoves.values());
@@ -167,7 +183,7 @@ function boot() {
       };
       accumulator += dt;
       while (accumulator >= timestep) {
-        stepPlayer(player, input, timestep); accumulator -= timestep;
+        stepPlayer(player, input, timestep, spinClock.settings.rimGravity); accumulator -= timestep;
         input.jump = false; jumpQueued = false;
       }
     } else accumulator = 0;
@@ -187,7 +203,7 @@ function boot() {
       dot.setAttribute('cy', String(50 - Math.sin(player.angle) * 37));
       sector.textContent = `SECTOR ${String(Math.floor(fraction * 16) + 1).padStart(2, '0')} / 16`;
       distance.textContent = `${String(Math.floor(fraction * TAU * RADIUS)).padStart(4, '0')} m / 1131 m`;
-      gravity.innerHTML = `${(gravityAt(RADIUS - player.height) / 9.81).toFixed(2)} <small>g</small>`;
+      gravity.innerHTML = `${(gravityAt(RADIUS - player.height, spinClock.settings.rimGravity) / 9.81).toFixed(2)} <small>g</small>`;
       nextHud = now + 100;
     }
     renderer.render(scene, exterior ? exteriorCamera : camera);
