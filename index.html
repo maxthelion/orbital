@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101c25" />
+    <meta name="description" content="Walk the observation ring of a space station above a giant planet. A Three.js gravity experiment." />
+    <title>PERIHELION — Ring walk</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <canvas id="scene" aria-label="First person view inside an orbital ring corridor"></canvas>
+    <header><div class="wordmark"><span class="orbit-symbol">◉</span> PERIHELION <small>ORBITAL OBSERVATORY</small></div><div class="live"><i></i> HABITAT SYSTEMS NOMINAL</div></header>
+    <button id="view-toggle" type="button" aria-pressed="false">Exterior view · V</button>
+    <aside id="exterior-caption"><span class="eyebrow">EXTERIOR / PLANET-OPPOSITE SIDE</span><strong>The ring turns. The axis stays fixed.</strong><p>Amber: axis towards planet centre · Cyan: sector 01<br>1.11 rpm · 53.8 seconds per rotation · 0.25 g at the rim</p></aside>
+    <section id="welcome" class="welcome">
+      <div class="eyebrow">JOVIAN ORBIT / OBSERVATION RING 01</div>
+      <h1>A different<br>kind of down.</h1>
+      <p>A kilometre of quiet, suspended above a giant.<br>Follow the curve. Watch the horizon turn.</p>
+      <button id="enter" type="button">Enter the ring <span>↗</span></button>
+      <div class="instructions"><span><kbd>W A S D</kbd> walk</span><span><kbd>MOUSE</kbd> look</span><span><kbd>SHIFT</kbd> run</span><span><kbd>SPACE</kbd> jump</span></div>
+      <div id="entry-status" role="status">Desktop recommended · arrow keys also turn · Esc to pause</div>
+    </section>
+    <div id="crosshair" aria-hidden="true"></div>
+    <aside class="telemetry">
+      <div class="ring-map"><svg viewBox="0 0 100 100" aria-label="Your position around the ring"><circle cx="50" cy="50" r="37" class="map-track"/><path d="M50 4v9 M50 87v9 M4 50h9 M87 50h9"/><circle cx="50" cy="50" r="3" class="map-center"/><circle id="map-dot" cx="50" cy="87" r="4"/></svg></div>
+      <div><span class="eyebrow">RING POSITION</span><strong id="sector">SECTOR 01 / 16</strong><span id="distance">0000 m / 1131 m</span></div>
+    </aside>
+    <aside class="gravity"><div><span class="eyebrow">LOCAL GRAVITY</span><strong id="gravity">0.25 <small>g</small></strong></div><div class="down-arrow">↓</div><span class="gravity-note">TOWARDS THE OUTER HULL</span></aside>
+    <footer><span>RADIUS 180 M <b>·</b> <span id="rotation-readout">ROTATION 1.11 RPM / 53.8 S</span></span><span id="footer-help">WALK / LOOK / EXPLORE</span><button id="reset" type="button" title="Return to the starting point">Reset position ↺</button></footer>
+    <div id="touch-controls"><button data-move="forward" aria-label="Walk forwards">↑</button><button data-move="left" aria-label="Step left">←</button><button data-move="back" aria-label="Walk backwards">↓</button><button data-move="right" aria-label="Step right">→</button></div>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
